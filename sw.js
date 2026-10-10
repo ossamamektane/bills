@@ -1,5 +1,5 @@
 // Bills
-var CACHE = "bills-v2";
+var CACHE = "bills-v3";
 var SHELL = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", function(e){

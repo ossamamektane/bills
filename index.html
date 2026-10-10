@@ -1378,6 +1378,9 @@
   /* Applied everywhere, not just from the home screen: full-screen browsers
      also run edge to edge, so the page keeps clear of the notch itself. */
   body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  /* Full-screen browsers (e.g. Wisp) often report a 0 safe area even though
+     the page runs under the Dynamic Island, so reserve the space ourselves. */
+  html.edge body{padding-top:max(env(safe-area-inset-top,0px), 62px)}
   @media (display-mode: standalone){
     body{padding-top:calc(env(safe-area-inset-top) + 6px);padding-bottom:calc(env(safe-area-inset-bottom) + 10px)}
   }
@@ -1386,6 +1389,14 @@
   /* Always open at the very top: no restored or animated scroll offset. */
   if("scrollRestoration" in history) history.scrollRestoration = "manual";
   (function(){
+    function edge(){
+      var full = (screen.height - window.innerHeight) < 40 &&
+                 !(window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+      document.documentElement.classList.toggle("edge", full);
+    }
+    edge();
+    window.addEventListener("resize", edge);
+    window.addEventListener("orientationchange", function(){ setTimeout(edge, 200); });
     function top(){ window.scrollTo(0,0); }
     top();
     window.addEventListener("load", function(){ top(); setTimeout(top, 60); });
