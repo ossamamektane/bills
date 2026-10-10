@@ -1,0 +1,12 @@
+{
+  "name": "Bills",
+  "short_name": "Bills",
+  "description": "Everything you pay on repeat, in one place.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF"
+}
