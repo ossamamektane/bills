@@ -1195,7 +1195,7 @@
      start, long to settle. Nothing here moves a popover, because placement is
      measured from the live rect and a transform would lie about it. */
   :root{--ease:cubic-bezier(.32,1.12,.28,1)}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:auto}
 
   @keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   .hero{animation:fadeup .72s var(--ease) both}
@@ -1375,10 +1375,23 @@
 
   /* Launched from the home screen there is no browser chrome, so the page
      has to keep clear of the notch and the home bar itself. */
+  /* Applied everywhere, not just from the home screen: full-screen browsers
+     also run edge to edge, so the page keeps clear of the notch itself. */
+  body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
   @media (display-mode: standalone){
     body{padding-top:calc(env(safe-area-inset-top) + 6px);padding-bottom:calc(env(safe-area-inset-bottom) + 10px)}
   }
 </style>
+<script>
+  /* Always open at the very top: no restored or animated scroll offset. */
+  if("scrollRestoration" in history) history.scrollRestoration = "manual";
+  (function(){
+    function top(){ window.scrollTo(0,0); }
+    top();
+    window.addEventListener("load", function(){ top(); setTimeout(top, 60); });
+    window.addEventListener("pageshow", top);
+  })();
+</script>
 </head>
 <body>
 <main class="wrap">
