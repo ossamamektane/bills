@@ -14,6 +14,8 @@ jobs:
       EXPO_ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       EXPO_APPLE_TEAM_TYPE: ${{ secrets.APPLE_TEAM_TYPE || 'INDIVIDUAL' }}
+      EAS_NO_VCS: 1
+      EAS_BUILD_NO_EXPO_GO_WARNING: true
     steps:
       - name: Get the code
         uses: actions/checkout@v4
@@ -33,6 +35,7 @@ jobs:
         run: |
           npm install
           npm run setup || echo "Skipped Expo's broken plugin step"
+          npx expo install expo-font || echo "ok"
           node -e "for (const m of ['react','react-native','expo-notifications','expo-localization','expo-document-picker','expo-sharing','expo-file-system','expo-splash-screen','expo-status-bar','react-native-safe-area-context','@react-native-async-storage/async-storage','@expo/vector-icons']) { require.resolve(m + '/package.json'); console.log('ok', m); }"
 
       - name: Add the App Store Connect key
@@ -51,6 +54,12 @@ jobs:
           '
         env:
           ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+
+      - name: Keep the upload small
+        run: printf 'node_modules/\n.expo/\nios/\nandroid/\n*.p8\n*.p12\n*.mobileprovision\n' > .easignore
+
+      - name: Show the package list being built
+        run: cat package.json
 
       - name: Link to your Expo account
         run: eas init --force --non-interactive
