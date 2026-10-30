@@ -1,0 +1,61 @@
+name: Send to App Store
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ios:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_ASC_API_KEY_PATH: ${{ runner.temp }}/asc_key.p8
+      EXPO_ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      EXPO_ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      EXPO_APPLE_TEAM_TYPE: ${{ secrets.APPLE_TEAM_TYPE || 'INDIVIDUAL' }}
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Expo / EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install everything
+        run: |
+          npm install
+          npm run setup
+
+      - name: Add the App Store Connect key
+        run: |
+          printf '%s' "${{ secrets.ASC_KEY_P8 }}" > "$EXPO_ASC_API_KEY_PATH"
+          node -e '
+            const fs = require("fs");
+            const eas = JSON.parse(fs.readFileSync("eas.json", "utf8"));
+            eas.submit.production = { ios: {
+              ascAppId: process.env.ASC_APP_ID,
+              ascApiKeyPath: process.env.EXPO_ASC_API_KEY_PATH,
+              ascApiKeyId: process.env.EXPO_ASC_KEY_ID,
+              ascApiKeyIssuerId: process.env.EXPO_ASC_ISSUER_ID
+            }};
+            fs.writeFileSync("eas.json", JSON.stringify(eas, null, 2));
+          '
+        env:
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+
+      - name: Link to your Expo account
+        run: eas init --force --non-interactive
+
+      - name: Build the iPhone app (takes ~15–30 min)
+        run: eas build --platform ios --profile production --non-interactive --wait
+
+      - name: Upload to App Store Connect
+        run: eas submit --platform ios --latest --profile production --non-interactive --wait
