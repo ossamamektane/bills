@@ -1,0 +1,35 @@
+name: iOS Build (free, local)
+
+# ===== CHANGE THESE FOR EACH APP =====
+env:
+  APP_STORE_APP_ID: "6829007704"   # Bills – Recurring Expenses
+  EXPO_PROJECT_ID: "e061d067-b02a-4177-a106-82757c392d5e"   # Bills Expo project
+# =====================================
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 90
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_BUILD_NO_EXPO_GO_WARNING: "true"
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check setup
+        run: |
+          FAIL=0
+          [ -z "$EXPO_TOKEN" ] && echo "❌ Missing GitHub secret: EXPO_TOKEN" && FAIL=1
+          [ -z "$ASC_KEY_ID" ] && echo "❌ Missing GitHub secret: ASC_KEY_ID" && FAIL=1
+          [ -z "$ASC_ISSUER_ID" ] && echo "❌ Missing GitHub secret: ASC_ISSUER_ID" && FAIL=1
+          [ -z "$ASC_KEY_P8" ] && echo "❌ Missing GitHub secret: ASC_KEY_P8" && FAIL=1
+          case "$APP_STORE_APP_ID" in ""|PASTE*) echo "❌ Set AP
