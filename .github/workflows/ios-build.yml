@@ -32,9 +32,7 @@ jobs:
           [ -z "$ASC_KEY_ID" ] && echo "❌ Missing GitHub secret: ASC_KEY_ID" && FAIL=1
           [ -z "$ASC_ISSUER_ID" ] && echo "❌ Missing GitHub secret: ASC_ISSUER_ID" && FAIL=1
           [ -z "$ASC_KEY_P8" ] && echo "❌ Missing GitHub secret: ASC_KEY_P8" && FAIL=1
-          case "$APP_STORE_APP_ID" in ""|PASTE*) echo "❌ Set APP_STORE_APP_ID at the top of this file" && FAIL=1;; esac
-          if [ -f app.json ]; then
-            node -e 'const c=JSON.parse(require("fs").readFileSync("app.json","utf8"));const e=c.expo||c;if(!(e.ios&&e.ios.bundleIdentifier)){console.log("❌ app.json is missing ios.bundleIdentifier");process.exit(1)}console.log("✅ Bundle ID: "+e.ios.bundleIdentifier)' || FAIL=1
+          case "$APP_STORE_APP_ID" in ""|PASTE*) echo "❌ Set AP            node -e 'const c=JSON.parse(require("fs").readFileSync("app.json","utf8"));const e=c.expo||c;if(!(e.ios&&e.ios.bundleIdentifier)){console.log("❌ app.json is missing ios.bundleIdentifier");process.exit(1)}console.log("✅ Bundle ID: "+e.ios.bundleIdentifier)' || FAIL=1
           fi
           exit $FAIL
 
