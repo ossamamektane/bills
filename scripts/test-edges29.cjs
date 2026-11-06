@@ -1,0 +1,10 @@
+// Exercise short-viewport popup bounds, clear dismiss-layer timing and final list edge.
+// Popups use their own 16px inset, not the device home-indicator padding of old bottom sheets.
+const {testUrl}=require('./ui-fixture.cjs');const {chromium}=require('playwright');const assert=require('node:assert/strict');
+(async()=>{let b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,args:['--no-sandbox']});let p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});await p.goto(testUrl+'?t=2026-11-06T12:30:00&fresh=1&native=1&seed=1');let ev=s=>p.evaluate(s=>__R.ev(s),s);
+// Simulate the native WebView's home-indicator inset.
+await p.evaluate(()=>document.documentElement.style.setProperty('--sb','34px','important'));await ev('openAll()');
+let timing=await p.evaluate(()=>({opacity:getComputedStyle(document.querySelector('#aScrim')).opacity,transition:getComputedStyle(document.querySelector('#aScrim')).transitionDuration}));assert.equal(timing.opacity,'1');assert.equal(timing.transition,'0s');await p.waitForTimeout(500);
+await p.locator('#aList').evaluate(e=>e.scrollTop=e.scrollHeight);let edge=await p.locator('#aList').evaluate(e=>({pad:parseFloat(getComputedStyle(e).paddingBottom),last:e.querySelector('.box:last-child').getBoundingClientRect().bottom,bottom:e.getBoundingClientRect().bottom}));assert(edge.pad>=15&&edge.last<=edge.bottom-14,JSON.stringify(edge));await ev('closeAll();openSheet(null)');await p.waitForTimeout(500);
+for(const size of [{width:390,height:844},{width:390,height:420},{width:568,height:320}]){await p.setViewportSize(size);await p.waitForTimeout(120);let a=await p.locator('#sheet').boundingBox(),h=await p.locator('#shHead').boundingBox();assert(a.y>=-1&&a.y+a.height<=size.height+1&&h.y>=0&&h.y+h.height<=size.height,JSON.stringify({size,a,h}));}
+assert.equal(await p.locator('#prefs .gfoot').count(),0);await b.close();console.log('PASS: immediate scrim, safe bottom edge, no settings footer, resized sheet bounds');})().catch(e=>{console.error(e);process.exit(1)});
