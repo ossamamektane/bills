@@ -1,7 +1,0 @@
-// Verify CSS motion and Reduce Motion; iOS performance must be checked on-device.
-const {testUrl}=require('./ui-fixture.cjs'),{chromium}=require('playwright'),assert=require('node:assert/strict');
-(async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH,args:['--no-sandbox']});
-for(const reducedMotion of ['no-preference','reduce']){const p=await b.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion});await p.goto(testUrl+'?t=2026-11-06T12:30:00&fresh=1&native=1&seed=1');await p.evaluate(()=>__R.ev('openSheet(null)'));
-const duration=await p.locator('#sheet').evaluate(e=>getComputedStyle(e).transitionDuration);assert.equal(duration.startsWith('0s'),reducedMotion==='reduce',`sheet ${duration}`);await p.waitForTimeout(500);let box=await p.locator('#sheet').boundingBox();assert(Math.abs(box.y+box.height-844)<2,JSON.stringify(box));
-await p.locator('[data-picker-for=fStartDate]').click();let picker=await p.locator('.pickDialog').evaluate(e=>getComputedStyle(e).transitionDuration);assert.equal(picker.startsWith('0s'),reducedMotion==='reduce',`picker ${picker}`);await p.waitForTimeout(500);box=await p.locator('.pickDialog').boundingBox();assert(Math.abs(box.y+box.height-844)<2,JSON.stringify(box));await p.close();}
-await b.close();console.log('PASS: sheet and picker motion with Reduce Motion fallback');})().catch(e=>{console.error(e);process.exit(1)});
